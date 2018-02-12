@@ -9,6 +9,7 @@ import (
 )
 
 var hostings []hosting.Hosting
+var token = "239946ff1197350ee94e0052d21bff2a21154846"
 
 func GetHostings(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(hostings)
@@ -60,6 +61,19 @@ func DeleteHosting(w http.ResponseWriter, r *http.Request){
     http.Error(w, "", http.StatusNoContent)
 }
 
+func simpleMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        sessiontoken := r.Header.Get("X-Session-Token")
+        if sessiontoken == token {
+        // We found the token in our map
+            log.Printf("Authenticated token %s\n", token)
+            next.ServeHTTP(w, r)
+        } else {
+            http.Error(w, "Forbidden", 403)
+        }
+    })
+}
+
 // our main function
 func main() {
     hostings = append(hostings, hosting.Hosting{ID: "1", Name: "Hosting1", Cores: "2", Memory: "4096", Disc: "1TB"})
@@ -70,6 +84,7 @@ func main() {
     router.HandleFunc("/hosting/{id}", GetHosting).Methods("GET")
     router.HandleFunc("/hosting/{id}", CreateHosting).Methods("PUT")
     router.HandleFunc("/hosting/{id}", DeleteHosting).Methods("DELETE")
+    router.Use(simpleMiddleware)
     log.Fatal(http.ListenAndServe(":8000", router))
 }
 
