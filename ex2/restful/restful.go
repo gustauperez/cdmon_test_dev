@@ -23,7 +23,7 @@ func GetHosting(w http.ResponseWriter, r *http.Request) {
             return
         }
     }
-    json.NewEncoder(w).Encode(&hosting.Hosting{})
+    http.Error(w, "", http.StatusNotFound)
 }
 
 func CreateHosting(w http.ResponseWriter, r *http.Request){
