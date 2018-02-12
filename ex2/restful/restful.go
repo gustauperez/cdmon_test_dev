@@ -2,24 +2,18 @@ package main
 
 import (
     "encoding/json"
-    "log"
-    "net/http"
     "github.com/gorilla/mux"
+    "log"
+    "./model"
+    "net/http"
 )
 
-type Hosting struct {
-    ID        string   `json:"id"`
-    Name      string   `json:"name"`
-    Cores     string   `json:"cores"`
-    Memory    string   `json:"memory"`
-    Disc      string   `json:"disc"`
-}
-
-var hostings []Hosting
+var hostings []hosting.Hosting
 
 func GetHostings(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(hostings)
 }
+
 
 func GetHosting(w http.ResponseWriter, r *http.Request) {
     params := mux.Vars(r)
@@ -29,13 +23,13 @@ func GetHosting(w http.ResponseWriter, r *http.Request) {
             return
         }
     }
-    json.NewEncoder(w).Encode(&Hosting{})
+    json.NewEncoder(w).Encode(&hosting.Hosting{})
 }
 
 func CreateHosting(w http.ResponseWriter, r *http.Request){
     params := mux.Vars(r)
     found := false
-    var hosting Hosting
+    var hosting hosting.Hosting
     _ = json.NewDecoder(r.Body).Decode(&hosting)
     for id, item := range hostings {
         if item.ID == params["id"] {
@@ -53,6 +47,8 @@ func CreateHosting(w http.ResponseWriter, r *http.Request){
     json.NewEncoder(w).Encode(hosting)
 }
 
+// Because a DELETE should be idempotent, deleting an non-existing entity should
+// return a 204, the same as an existing deletion
 func DeleteHosting(w http.ResponseWriter, r *http.Request){
     params := mux.Vars(r)
     for index, item := range hostings {
@@ -60,18 +56,20 @@ func DeleteHosting(w http.ResponseWriter, r *http.Request){
             hostings = append(hostings[:index], hostings[index+1:]...)
             break
         }
-        json.NewEncoder(w).Encode(hostings)
     }
+    http.Error(w, "", http.StatusNoContent)
 }
 
 // our main function
 func main() {
-    hostings = append(hostings, Hosting{ID: "1", Name: "Hosting1", Cores: "2", Memory: "4096", Disc: "1TB"})
+    hostings = append(hostings, hosting.Hosting{ID: "1", Name: "Hosting1", Cores: "2", Memory: "4096", Disc: "1TB"})
+    hostings = append(hostings, hosting.Hosting{ID: "2", Name: "Hosting2", Cores: "4", Memory: "8192", Disc: "500MB"})
 
     router := mux.NewRouter()
     router.HandleFunc("/hostings", GetHostings).Methods("GET")
     router.HandleFunc("/hosting/{id}", GetHosting).Methods("GET")
-    router.HandleFunc("/hosting/{id}", CreateHosting).Methods("POST")
+    router.HandleFunc("/hosting/{id}", CreateHosting).Methods("PUT")
     router.HandleFunc("/hosting/{id}", DeleteHosting).Methods("DELETE")
     log.Fatal(http.ListenAndServe(":8000", router))
 }
+
