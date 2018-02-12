@@ -19,31 +19,39 @@ Three different scripts are provided. You can find them under the *ex1* director
 
 ## Exercise 2
 
+Here you can find a brief specification of the API:
+
+- *GET* */hostings/*: This will list all the hostings in the 'database'.
+- *GET* */hosting/{id}*: This will fetch a single hosting. If not found a 404 will be returned.
+- *PUT* */hosting/{id}*: This will put a new hosting or replace an existing one. The new hosting and an HTTP 200 will be returned in both cases.
+- *DELETE* */hoting/{id}*: This will delete an already existing hosting. If not found it will do nothing. In either case a 204 will be returned (which is, no content returned because a hosting has been removed).
+
+To solve this one, golang has been used. To handle the API, the gorilla mux golang package has been used.
+
+### Deployment
+
 For this one you'd need a personal Digital Ocean key. Remember that you need to install docker in your machine (your mileage may vary, for Linux check your package manager, for Windows and MacOs, go to the official site and download them). After that, open a command line and run the following commands (I’m assuming a UNIX machine, for Windows probably you’d need to use back slashes instead):
 
 ```
 # docker-machine create --driver digitalocean \ --digitalocean-access-token ${DIGITAL_OCEAN_TOKEN} ${DROPLET_NAME} [1]
 # eval $(docker-machine env ${DROPLET_NAME})
-# cd ${GUS_GITHUB_REPO}/ex1
+# cd ${GUS_GITHUB_REPO}/ex2
 # docker-compose build --up -d
 ```
 Please replace **${DIGITAL_OCEAN_TOKEN}** with your personal token generated in your Digital Ocean account and **${DROPLET_NAME}** with the name of your droplet. **${GUS_GITHUB_REPO}** is the directory where you cloned the repo.
 
 This will connect to your droplet, build the latest image of the official docker container from Apache (which uses the latest version of 2.4, tagged as latest) and run it in the droplet.
 
-Here you can find a brief specificaction of the API:
+If you want to save yourself from the hassle of deploying it by yourself, you can check it in:
 
-- *GET* */hostings/*: This will list all the hostings in the 'database'.
-- *GET* */hosting/{id}*: This will fetch a single hosting. If not found a 404 will be returned.
-- *PUT* */hosting/{id}*: This will put a new hosting or replace an existing one. The new hosting and an HTTP 200 will be returned in both cases.
-- *DELETE* */hoting/{id}*: This will delete an already existing hosting. If not found it will do nothing. In either case a 204 will be returned (which is, no content returned because we're removing a hosting).
+	http://174.138.53.103:8000/
 
-Examples:
+### Examples
 
 - Fetching all the hostings:
 
 ```
-MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XGET -vv http://localhost:8000/hostings
+MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XGET -H "X-Session-Token:23994ff1197350ee94e0052d21bff2a21154846" -vv http://localhost:8000/hostings
 Note: Unnecessary use of -X or --request, GET is already inferred.
 *   Trying ::1...
 * TCP_NODELAY set
@@ -65,7 +73,7 @@ Note: Unnecessary use of -X or --request, GET is already inferred.
 - Fetching a hosting:
 
 ```
-MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XGET -vv http://localhost:8000/hosting/2
+MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XGET -H "X-Session-Token:23994ff1197350ee94e0052d21bff2a21154846" -vv http://localhost:8000/hosting/2
 Note: Unnecessary use of -X or --request, GET is already inferred.
 *   Trying ::1...
 * TCP_NODELAY set
@@ -87,7 +95,7 @@ Note: Unnecessary use of -X or --request, GET is already inferred.
 - Creating a hosting:
 
 ```
-MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XPUT -vv -d '{"name":"Hosting4","cores":"3","memory":"4096","Disc":"1TB"}' http://localhost:8000/hosting/3
+MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XPUT -vv -H "X-Session-Token:23994ff1197350ee94e0052d21bff2a21154846" -d '{"name":"Hosting4","cores":"3","memory":"4096","Disc":"1TB"}' http://localhost:8000/hosting/3
 *   Trying ::1...
 * TCP_NODELAY set
 * Connected to localhost (::1) port 8000 (#0)
@@ -111,7 +119,7 @@ MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XPUT -vv -d '{"name":"Hosting4",
 - Updating a hosting:
 
 ```
-MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XPUT -vv -d '{"name":"Hosting5","cores":"4","memory":"16384","Disc":"1TB"}' http://localhost:8000/hosting/3
+MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XPUT -vv -H "X-Session-Token:23994ff1197350ee94e0052d21bff2a21154846" -d '{"name":"Hosting5","cores":"4","memory":"16384","Disc":"1TB"}' http://localhost:8000/hosting/3
 *   Trying ::1...
 * TCP_NODELAY set
 * Connected to localhost (::1) port 8000 (#0)
@@ -135,7 +143,7 @@ MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XPUT -vv -d '{"name":"Hosting5",
 - Removing a hosting:
 
 ```
-MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XDELETE -vv http://localhost:8000/hosting/3
+MacBook-Air-de-Gustau:cdmon_test_dev Gus$ curl -XDELETE -vv -H "X-Session-Token:23994ff1197350ee94e0052d21bff2a21154846" http://localhost:8000/hosting/3
 *   Trying ::1...
 * TCP_NODELAY set
 * Connected to localhost (::1) port 8000 (#0)
