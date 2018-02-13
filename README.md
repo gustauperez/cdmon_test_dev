@@ -26,7 +26,7 @@ Here you can find a brief specification of the API:
 - *PUT* */hosting/{id}*: This will put a new hosting or replace an existing one. The new hosting and an HTTP 200 will be returned in both cases.
 - *DELETE* */hoting/{id}*: This will delete an already existing hosting. If not found it will do nothing. In either case a 204 will be returned (which is, no content returned because a hosting has been removed).
 
-To solve this one, golang has been used. To handle the API, the gorilla mux golang package has been used.
+To solve this one, golang has been used. To handle the API, the gorilla mux golang package has been used. The API needs an HTTP header token (X-Session-Token) to validate the API call. 
 
 ### Deployment
 
